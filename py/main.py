@@ -7,11 +7,11 @@ import pandas as pd
 import sqlite3
 
 def main():
-    CHUNK_SIZE = 100
+    CHUNK_SIZE = 500
     load_db()
     service = authenticate_gmail()
     ids = get_msg_ids(service)
-    
+    print("ID's fetched and sorted")
     df = pd.DataFrame(columns=["id", "from", "to", "subject", "body", "snippet", "date"])
     conn = sqlite3.connect('emails.db')
 
@@ -39,6 +39,7 @@ def main():
         df = df[0:0]
         chunks_completed += 1
         print(chunks_completed)
+    conn.close()
 
 
 if __name__ == '__main__':
