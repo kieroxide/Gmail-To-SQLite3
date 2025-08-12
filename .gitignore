@@ -1,2 +1,5 @@
 credentials.json
+emails.db
+/__pycache__
 *.pkl
+*.pyc
