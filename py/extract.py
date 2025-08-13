@@ -1,6 +1,6 @@
 from base64 import urlsafe_b64decode
 from bs4 import BeautifulSoup
-from globals import DB_PATH, TABLE_NAME
+from globals import DB_PATH, EMAIL_TABLE_NAME
 from utils import chunk_list
 import sqlite3
 import pandas as pd
@@ -18,7 +18,7 @@ def extract_email_data_to_sql(ids, service):
             ID = id
             df.loc[len(df)] = extract_data_from_email(service, ID)
         # Appends data to sql_server
-        df.to_sql(TABLE_NAME, conn, if_exists="append")
+        df.to_sql(EMAIL_TABLE_NAME, conn, if_exists="append")
         df = df[0:0] # Empties data frame
         chunks_completed += 1
     conn.close()
@@ -45,7 +45,7 @@ def clean_html_string(encoded_data):
     
     # Use html.parser to get rid of the html syntax
     body_soup = BeautifulSoup(decoded_body, "html.parser")
-    body = "".join(body_soup.get_text().split())
+    body = " ".join(body_soup.get_text().split())
 
     return body
 

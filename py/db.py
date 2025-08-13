@@ -2,7 +2,8 @@ import sqlite3
 import os
 import pandas as pd
 from datetime import datetime
-from globals import DB_PATH, TABLE_NAME
+from globals import DB_PATH, EMAIL_TABLE_NAME
+
 def db_exists():
     """Returns whether the db file and table exists"""
     if not os.path.exists(DB_PATH):
@@ -25,7 +26,7 @@ def load_db(columns='"id", "from", "to", "subject", "body", "snippet", "date"'):
     conn = sqlite3.connect(DB_PATH)
     # Selects only the required columns in case of auto-increment index
     df = pd.read_sql_query(
-        f"SELECT {columns} FROM {TABLE_NAME}", # from and to are reserved words in sql 
+        f"SELECT {columns} FROM {EMAIL_TABLE_NAME}", # from and to are reserved words in sql 
         conn
     )
     conn.close()

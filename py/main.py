@@ -1,10 +1,12 @@
 from auth import authenticate_gmail
 from load import get_msg_ids
 from extract import extract_email_data_to_sql
+from analysis import assign_to_company
 from db import load_db
 import pandas as pd
 
 def main():
+    assign_to_company()
     service = authenticate_gmail()
     print("Authentication Complete")
     ids = get_msg_ids(service)

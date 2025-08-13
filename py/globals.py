@@ -1,5 +1,44 @@
 DB_PATH = "../sql/emails.db"
-TABLE_NAME = "emails"
+EMAIL_TABLE_NAME = "emails"
+COMPANY_IDS_TABLE_NAME = "company"
+
+AVOID_KEYWORDS = ["indeed", "reed", "totaljobs", "cv-library", "monster", "glassdoor", 
+    "linkedin", "adzuna", "jobsite", "gov", "ziprecruiter", "careerbuilder", 
+    "simplyhired", "jora", "careerjet", "technojobs", "cwjobs", "workable",
+    "itjobboard", "devitjobs", "stackoverflow", "dice", "hired", "greenhouse",
+    "workinstartups", "welcometothejungle", "otta", "shecancode", "womenintech",
+    "remote", "flexa", "weworkremotely", "remoteok", "workingnomads",
+    "nodesk", "eurojobs", "eures"]
+
+JOB_MUST_KEYWORDS = {
+    # --- The Application Stage ---
+    "application",
+    "apply",
+    "applied",
+    "cv",
+    "resume",
+    "submission",
+    "submitted",
+    "vacancy",
+    "cover letter",
+    "credentials",
+    
+    # --- The Interview Process ---
+    "interview",
+    "interviews",
+    
+    # --- The Role Itself ---
+    "role",
+    "position",
+    "opportunity",
+    "job",
+    
+    # --- Offer & Final Stages ---
+    "offer",
+    "contract",
+    "onboarding",
+    "employment",
+}
 
 APPLICATION = [
     "application",
