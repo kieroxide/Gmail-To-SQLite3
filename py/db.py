@@ -3,22 +3,29 @@ import os
 import pandas as pd
 from datetime import datetime
 from globals import DB_PATH, TABLE_NAME
-
-def load_db():
-    df = pd.DataFrame(columns=["id", "from", "to", "subject", "body", "snippet", "date"])
+def db_exists():
+    """Returns whether the db file and table exists"""
     if not os.path.exists(DB_PATH):
-        return df
+        return False
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     # Need to check if table exists
     if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='emails';").fetchone():
-        return df
+        return False
+    conn.close()
+    return True
+
+def load_db(columns='"id", "from", "to", "subject", "body", "snippet", "date"'):
+    """Loads the inputted columns from db to a pd dataframe. If it doesn't exists, returns empty df with correct columns"""
+    if not db_exists():
+        return pd.DataFrame(columns=["id", "from", "to", "subject", "body", "snippet", "date"])
     
+    conn = sqlite3.connect(DB_PATH)
     # Selects only the required columns in case of auto-increment index
     df = pd.read_sql_query(
-        f"SELECT id, `from`, `to`, subject, body, snippet, date FROM {TABLE_NAME}",
+        f"SELECT {columns} FROM {TABLE_NAME}", # from and to are reserved words in sql 
         conn
     )
     conn.close()
