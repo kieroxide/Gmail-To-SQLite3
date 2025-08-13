@@ -1,6 +1,42 @@
 from base64 import urlsafe_b64decode
 from bs4 import BeautifulSoup
+from globals import DB_PATH
+from utils import chunk_list
+import sqlite3
+import pandas as pd
 
+def extract_email_data_to_sql(ids, service):
+    df = pd.DataFrame(columns=["id", "from", "to", "subject", "body", "snippet", "date"])
+    CHUNK_SIZE = 500
+
+    conn = sqlite3.connect(DB_PATH)
+    chunked_ids = chunk_list(ids, CHUNK_SIZE)
+    # Get a chunk of email data and store in dataframe
+    chunks_completed = 0
+    for id_chunk in chunked_ids:
+        for id in id_chunk:
+            ID = id["id"]
+            df.loc[len(df)] = extract_data_from_email(service, ID)
+        # Appends data to sql_server
+        df.to_sql(TABLE_NAME, conn, if_exists="append")
+        df = df[0:0] # Empties data frame
+        chunks_completed += 1
+    conn.close()
+
+def extract_data_from_email(service, ID):
+    # Extracts all required data to dataframe
+    result = service.users().messages().get(userId="me", id=ID).execute()
+    payload = result["payload"]
+
+    SNIPPET = ""
+    if "snippet" in payload:
+        SNIPPET = payload["snippet"]
+
+    BODY = get_body(payload)
+    FROM, TO, SUBJECT, DATE = get_headers(payload)
+
+    return [ID, FROM, TO, SUBJECT, BODY, SNIPPET, DATE]
+    
 def clean_html_string(encoded_data):
     """Decodes and cleans an base64 encoded html string"""
     body = ""

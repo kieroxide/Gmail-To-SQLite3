@@ -3,3 +3,4 @@ emails.db
 /__pycache__
 *.pkl
 *.pyc
+data.csv
