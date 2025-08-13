@@ -1,4 +1,3 @@
-from db import get_date_range
 from globals import APPLICATION, INTERVIEW, OFFER, JOB_SITES
 
 def get_msg_ids(service):

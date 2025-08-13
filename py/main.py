@@ -9,7 +9,7 @@ def main():
     ids = get_msg_ids(service)
     extract_email_data_to_sql(ids, service)
     df = load_db()
-    df.to_csv("data", mode="w")
+    df.to_csv("data.csv", mode="w")
 
 if __name__ == '__main__':
     main()
