@@ -1,17 +1,33 @@
 import sqlite3
+import os
 import pandas as pd
 from datetime import datetime
+from globals import DB_PATH, TABLE_NAME
 
 def load_db():
-    conn = sqlite3.connect("emails.db")
-    df = pd.read_sql_query("SELECT * FROM Emails", conn)
+    df = pd.DataFrame(columns=["id", "from", "to", "subject", "body", "snippet", "date"])
+    if not os.path.exists(DB_PATH):
+        return df
+    
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Need to check if table exists
+    if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='emails';").fetchone():
+        return df
+    
+    # Selects only the required columns in case of auto-increment index
+    df = pd.read_sql_query(
+        f"SELECT id, `from`, `to`, subject, body, snippet, date FROM {TABLE_NAME}",
+        conn
+    )
     conn.close()
     return df
 
 def get_date_range():
     """Returns the oldest and newest date"""
 
-    conn = sqlite3.connect("emails.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""
