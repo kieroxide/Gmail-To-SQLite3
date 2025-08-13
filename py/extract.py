@@ -1,6 +1,6 @@
 from base64 import urlsafe_b64decode
 from bs4 import BeautifulSoup
-from globals import DB_PATH
+from globals import DB_PATH, TABLE_NAME
 from utils import chunk_list
 import sqlite3
 import pandas as pd
@@ -10,12 +10,12 @@ def extract_email_data_to_sql(ids, service):
     CHUNK_SIZE = 500
 
     conn = sqlite3.connect(DB_PATH)
-    chunked_ids = chunk_list(ids, CHUNK_SIZE)
+    chunked_ids = chunk_list(list(ids), CHUNK_SIZE)
     # Get a chunk of email data and store in dataframe
     chunks_completed = 0
     for id_chunk in chunked_ids:
         for id in id_chunk:
-            ID = id["id"]
+            ID = id
             df.loc[len(df)] = extract_data_from_email(service, ID)
         # Appends data to sql_server
         df.to_sql(TABLE_NAME, conn, if_exists="append")
