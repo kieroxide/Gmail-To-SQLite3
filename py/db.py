@@ -2,7 +2,23 @@ import sqlite3
 import os
 import pandas as pd
 from datetime import datetime
-from globals import DB_PATH, EMAIL_TABLE_NAME
+from globals import DB_PATH, EMAIL_TABLE_NAME, FROM_IDS_TABLE_NAME
+
+def group_db():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    # Create a new table with sender + all email IDs for that sender
+    cur.execute(f"""
+        CREATE TABLE IF NOT EXISTS {FROM_IDS_TABLE_NAME} AS
+        SELECT "from", GROUP_CONCAT("id") AS email_ids
+        FROM {EMAIL_TABLE_NAME}
+        GROUP BY "from"
+    """)
+    cur.execute(f'PRAGMA table_info({FROM_IDS_TABLE_NAME})')
+    print(cur.fetchall())
+    conn.commit()
+    conn.close()
 
 def db_exists():
     """Returns whether the db file and table exists"""
@@ -18,15 +34,15 @@ def db_exists():
     conn.close()
     return True
 
-def load_db(columns='"id", "from", "to", "subject", "body", "snippet", "date"'):
+def load_table(table = EMAIL_TABLE_NAME, columns='"id", "from", "to", "subject", "body", "snippet", "date"'):
     """Loads the inputted columns from db to a pd dataframe. If it doesn't exists, returns empty df with correct columns"""
     if not db_exists():
-        return pd.DataFrame(columns=["id", "from", "to", "subject", "body", "snippet", "date"])
+        return pd.DataFrame(columns=columns)
     
     conn = sqlite3.connect(DB_PATH)
     # Selects only the required columns in case of auto-increment index
     df = pd.read_sql_query(
-        f"SELECT {columns} FROM {EMAIL_TABLE_NAME}", # from and to are reserved words in sql 
+        f"SELECT {columns} FROM {table}", # from and to are reserved words in sql 
         conn
     )
     conn.close()
