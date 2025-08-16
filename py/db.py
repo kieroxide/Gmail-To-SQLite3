@@ -105,39 +105,41 @@ def db_exists():
     conn.close()
     return True
 
-def load_table(table = EMAIL_TABLE["name"], columns=EMAIL_TABLE["columns"]):
+def load_table(TABLE = EMAIL_TABLE):
     """Loads the inputted columns from db to a pd dataframe. If it doesn't exists, returns empty df with correct columns"""
     if not db_exists():
-        return pd.DataFrame(columns=columns)
+        return pd.DataFrame(columns=TABLE["col_names"])
     
+    cols = ", ".join(TABLE["col_names"])
     conn = connect_db()
     # Selects only the required columns in case of auto-increment index
     df = pd.read_sql_query(
-        f"SELECT {columns} FROM {table}", # from and to are reserved words in sql 
+        f"SELECT {cols} FROM {TABLE["name"]}", # from and to are reserved words in sql 
         conn
     )
     conn.close()
     return df
 
-def get_date_range():
-    """Returns the oldest and newest date"""
-
-    conn = connect_db()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT MIN(date) AS oldest_date,
-               MAX(date) AS newest_date
-        FROM emails;
-    """)
-    oldest_date, newest_date = cursor.fetchone()
-    # Convert to datetime objects 
-    oldest_date = datetime.strptime(oldest_date, "%d %b %Y %H:%M:%S %z")
-    newest_date = datetime.strptime(newest_date, "%a, %d %b %Y %H:%M:%S %z")
-
-    # Convert to Gmail API date format (YYYY/MM/DD)
-    oldest_gmail = oldest_date.strftime("%Y/%m/%d")
-    newest_gmail = newest_date.strftime("%Y/%m/%d")
-
-    conn.close()
-    return oldest_gmail, newest_gmail
+#def get_date_range():
+#    """Returns the oldest and newest date"""
+#
+#    conn = connect_db()
+#    cursor = conn.cursor()
+#
+#    cursor.execute("""
+#        SELECT MIN(date) AS oldest_date,
+#               MAX(date) AS newest_date
+#        FROM emails;
+#    """)
+#    oldest_date, newest_date = cursor.fetchone()
+#    # Convert to datetime objects 
+#    oldest_date = datetime.strptime(oldest_date, "%d %b %Y %H:%M:%S %z")
+#    newest_date = datetime.strptime(newest_date, "%a, %d %b %Y %H:%M:%S %z")
+#
+#    # Convert to Gmail API date format (YYYY/MM/DD)
+#    oldest_gmail = oldest_date.strftime("%Y/%m/%d")
+#    newest_gmail = newest_date.strftime("%Y/%m/%d")
+#
+#    conn.close()
+#    return oldest_gmail, newest_gmail
+#
