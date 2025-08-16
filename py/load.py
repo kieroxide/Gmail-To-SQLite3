@@ -1,6 +1,5 @@
-from globals import APPLICATION, INTERVIEW, OFFER, JOB_SITES, EMAIL_TABLE_NAME
+from globals import EMAIL_TABLE
 from db import load_table
-import pandas as pd
 
 def get_msg_ids(service):
     """Builds and returns set of all email ids outside date range of db at a batch of max 500 each time
@@ -9,7 +8,7 @@ def get_msg_ids(service):
     ids = set()
     page_token = None
     # Started with 10 days to speed up the loading process
-    query = build_query() + " newer_than:10d"
+    query = "newer_than:1d"
     while(True):
         try:
             results = service.users().messages().list(userId="me", maxResults=500, pageToken=page_token, q=query).execute()
@@ -29,19 +28,19 @@ def get_msg_ids(service):
     return culled_ids
 
 def cull_ids(ids):
-    columns = ['id']
-    df = load_table(EMAIL_TABLE_NAME, columns)
-    db_ids = set(df["id"])
+    columns = EMAIL_TABLE['columns'][0][0]
+    df = load_table(EMAIL_TABLE["name"], columns)
+    db_ids = set(df["email_id"])
     # Removes emails already stored in db
     ids = ids - db_ids
     return ids 
 
-def build_query():
-    query = ""
-    keywords_2Darr = [APPLICATION, INTERVIEW, OFFER, JOB_SITES]
-    for keywords in keywords_2Darr:
-        for keyword in keywords:
-            query += " " + keyword + " OR"
-    # Removes the trailing OR
-    query = query[:-3] 
-    return query
+#def build_query():
+#    query = ""
+#    keywords_2Darr = [APPLICATION, INTERVIEW, OFFER, JOB_SITES]
+#    for keywords in keywords_2Darr:
+#        for keyword in keywords:
+#            query += " " + keyword + " OR"
+#    # Removes the trailing OR
+#    query = query[:-3] 
+#    return query
