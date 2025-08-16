@@ -5,8 +5,7 @@ DF_COLS = ["email_id", "sender", "recipient", "subject", "body", "snippet", "tim
 EMAIL_TABLE = {
     "name": "emails",
     "columns": [
-        ("id", "INTEGER PRIMARY KEY AUTOINCREMENT"),
-        ("email_id", "TEXT"),
+        ("email_id", "TEXT PRIMARY KEY"),
         ("sender_id", "INTEGER"),
         ("recipient_id", "INTEGER"),
         ("snippet", "TEXT"),
