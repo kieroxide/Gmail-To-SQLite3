@@ -32,3 +32,7 @@ RECIPIENT_TABLE = {
         ("recipient", "TEXT UNIQUE")
     ]
 }
+
+EMAIL_TABLE["col_names"] = [col[0] for col in EMAIL_TABLE["columns"] if not col[0].startswith("FOREIGN KEY")]
+SENDER_TABLE["col_names"] = [col[0] for col in SENDER_TABLE["columns"]]
+RECIPIENT_TABLE["col_names"] = [col[0] for col in RECIPIENT_TABLE["columns"]]
