@@ -5,3 +5,4 @@ emails.db
 *.pyc
 data.csv
 py/data
+*.csv
