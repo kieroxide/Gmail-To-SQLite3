@@ -34,13 +34,3 @@ def cull_ids(ids):
     # Removes emails already stored in db
     ids = ids - db_ids
     return ids 
-
-#def build_query():
-#    query = ""
-#    keywords_2Darr = [APPLICATION, INTERVIEW, OFFER, JOB_SITES]
-#    for keywords in keywords_2Darr:
-#        for keyword in keywords:
-#            query += " " + keyword + " OR"
-#    # Removes the trailing OR
-#    query = query[:-3] 
-#    return query
