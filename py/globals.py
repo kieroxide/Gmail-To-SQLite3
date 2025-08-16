@@ -1,27 +1,22 @@
 DB_PATH = "../sql/emails.db"
 EMAIL_TABLE_NAME = "emails"
-COMPANY_IDS_TABLE_NAME = "company"
+FROM_IDS_TABLE_NAME = "company"
 
-AVOID_KEYWORDS = ["indeed", "reed", "totaljobs", "cv-library", "monster", "glassdoor", 
+AVOID_KEYWORDS = {"indeed", "reed", "totaljobs", "cv-library", "monster", "glassdoor", 
     "linkedin", "adzuna", "jobsite", "gov", "ziprecruiter", "careerbuilder", 
     "simplyhired", "jora", "careerjet", "technojobs", "cwjobs", "workable",
     "itjobboard", "devitjobs", "stackoverflow", "dice", "hired", "greenhouse",
     "workinstartups", "welcometothejungle", "otta", "shecancode", "womenintech",
     "remote", "flexa", "weworkremotely", "remoteok", "workingnomads",
-    "nodesk", "eurojobs", "eures"]
+    "nodesk", "eurojobs", "eures"}
 
 JOB_MUST_KEYWORDS = {
     # --- The Application Stage ---
     "application",
-    "apply",
-    "applied",
     "cv",
     "resume",
-    "submission",
-    "submitted",
     "vacancy",
     "cover letter",
-    "credentials",
     
     # --- The Interview Process ---
     "interview",
@@ -30,23 +25,15 @@ JOB_MUST_KEYWORDS = {
     # --- The Role Itself ---
     "role",
     "position",
-    "opportunity",
     "job",
-    
-    # --- Offer & Final Stages ---
-    "offer",
-    "contract",
-    "onboarding",
     "employment",
 }
 
-APPLICATION = [
+APPLICATION = {
     "application",
     "CV",
     "resume",
     "vacancy",
-    "position",
-    "opportunity",
     "role",
     "candidate",
     "recruiter",
@@ -54,32 +41,22 @@ APPLICATION = [
     '"we received your application"',
     '"job opening"',
     '"new role"'
-]
+}
 
-INTERVIEW = [
+INTERVIEW = {
     "interview",
-    "assessment",
-    "test",
-    "screen",
     "screening",
-    '"phone screen"',
     '"technical test"',
-    '"coding challenge"',
     '"schedule a call"',
     '"schedule an interview"',
-    '"next steps"',
-]
+}
 
-OFFER = [
-    "offer",
+OFFER = {
     '"job offer"',
     '"offer of employment"',
-    "contract",
-    "onboarding",
-    '"pleased to offer"'
-]
+}
 
-JOB_SITES = [
+JOB_SITES = {
     # General UK & International Job Boards
     "indeed.com",
     "reed.co.uk",
@@ -128,4 +105,4 @@ JOB_SITES = [
     # European / Global
     "eurojobs.com",
     "eures.europa.eu"
-]
+}

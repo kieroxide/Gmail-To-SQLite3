@@ -1,5 +1,5 @@
-from globals import APPLICATION, INTERVIEW, OFFER, JOB_SITES
-from db import load_db
+from globals import APPLICATION, INTERVIEW, OFFER, JOB_SITES, EMAIL_TABLE_NAME
+from db import load_table
 import pandas as pd
 
 def get_msg_ids(service):
@@ -8,7 +8,7 @@ def get_msg_ids(service):
 
     ids = set()
     page_token = None
-    # Started with 10 days to speed dup the loading process
+    # Started with 10 days to speed up the loading process
     query = build_query() + " newer_than:10d"
     while(True):
         try:
@@ -29,8 +29,8 @@ def get_msg_ids(service):
     return culled_ids
 
 def cull_ids(ids):
-    columns = "id"
-    df = load_db(columns)
+    columns = ['id']
+    df = load_table(EMAIL_TABLE_NAME, columns)
     db_ids = set(df["id"])
     # Removes emails already stored in db
     ids = ids - db_ids
