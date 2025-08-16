@@ -20,6 +20,7 @@ def extract_email_data_to_sql(ids, service):
             df.loc[len(df)] = extract_data_from_email(service, ID)
         
         # Appends data to sql_server
+        df.set_index(EMAIL_TABLE["col_names"][0])
         addToDB(df)
         df = df[0:0] # Empties data frame
 

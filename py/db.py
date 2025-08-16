@@ -117,6 +117,7 @@ def load_table(TABLE = EMAIL_TABLE):
         f"SELECT {cols} FROM {TABLE["name"]}", # from and to are reserved words in sql 
         conn
     )
+    df = df.set_index(TABLE["col_names"][0])
     conn.close()
     return df
 

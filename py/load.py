@@ -29,7 +29,7 @@ def get_msg_ids(service):
 
 def cull_ids(ids):
     df = load_table(EMAIL_TABLE)
-    db_ids = set(df["email_id"])
+    db_ids = set(df.index)
     # Removes emails already stored in db
     ids = ids - db_ids
     return ids 
