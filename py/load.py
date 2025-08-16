@@ -28,8 +28,7 @@ def get_msg_ids(service):
     return culled_ids
 
 def cull_ids(ids):
-    columns = EMAIL_TABLE['columns'][0][0]
-    df = load_table(EMAIL_TABLE["name"], columns)
+    df = load_table(EMAIL_TABLE)
     db_ids = set(df["email_id"])
     # Removes emails already stored in db
     ids = ids - db_ids
