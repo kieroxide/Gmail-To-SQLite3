@@ -8,7 +8,7 @@ def get_msg_ids(service):
     ids = set()
     page_token = None
     # Started with 10 days to speed up the loading process
-    query = "newer_than:1d"
+    query = "newer_than:10000d"
     while(True):
         try:
             results = service.users().messages().list(userId="me", maxResults=500, pageToken=page_token, q=query).execute()
@@ -28,6 +28,7 @@ def get_msg_ids(service):
     return culled_ids
 
 def cull_ids(ids):
+    """Method to remove all duplicated ids already in the database"""
     df = load_table(EMAIL_TABLE)
     db_ids = set(df.index)
     # Removes emails already stored in db
