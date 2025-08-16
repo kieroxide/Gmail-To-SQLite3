@@ -1,15 +1,20 @@
 from base64 import urlsafe_b64decode
 from bs4 import BeautifulSoup
-from globals import DB_PATH, EMAIL_TABLE, DF_COLS
+from globals import EMAIL_TABLE, DF_COLS
 from utils import chunk_list
 from db import addToDB, connect_db
-import sqlite3
 import pandas as pd
+import time
+
+API_TOTAL = 0
 
 def extract_email_data_to_sql(ids, service):
+    """Iterates over email ids and saves the email's data to the sql database
+    in chunks to alleviate wait times"""
+    global API_TOTAL
     df = pd.DataFrame(columns=DF_COLS)
 
-    CHUNK_SIZE = 500 
+    CHUNK_SIZE = 100 
     conn = connect_db()
     chunked_ids = chunk_list(list(ids), CHUNK_SIZE)
 
@@ -17,8 +22,14 @@ def extract_email_data_to_sql(ids, service):
     for id_chunk in chunked_ids:
         for id in id_chunk:
             ID = id
-            df.loc[len(df)] = extract_data_from_email(service, ID)
-        
+            # If a error occurs while requesting from API. Skips the email
+            data_arr = extract_data_from_email(service, ID)
+            if not data_arr:
+                continue
+            df.loc[len(df)] = data_arr
+
+        print(f"{API_TOTAL} seconds")
+        API_TOTAL = 0
         # Appends data to sql_server
         df.set_index(EMAIL_TABLE["col_names"][0])
         addToDB(df)
@@ -27,8 +38,19 @@ def extract_email_data_to_sql(ids, service):
     conn.close()
 
 def extract_data_from_email(service, ID):
+    """Requests the google API for the entire Email from the ID. Traverses the data structure
+    and collects, cleans and returns the data into an array"""
     # Extracts all required data to dataframe
-    result = service.users().messages().get(userId="me", id=ID).execute()
+    global API_TOTAL
+    try:
+        API_CALL = time.perf_counter()
+        result = service.users().messages().get(userId="me", id=ID).execute()
+        API_END = time.perf_counter()
+        API_TOTAL += API_END - API_CALL
+    except Exception as e:
+        print(f"Error {e}")
+        return None
+    
     payload = result["payload"]
     SNIPPET = ""
     if "snippet" in result:
