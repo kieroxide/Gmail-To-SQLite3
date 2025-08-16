@@ -12,9 +12,8 @@ def connect_db():
 
 def addToDB(df):
     df = assign_foreign_keys(df)
-    df = pd.DataFrame()
     conn = connect_db()
-    df.to_sql(EMAIL_TABLE["name"], conn, if_exists="append")
+    df.to_sql(EMAIL_TABLE["name"], conn, if_exists="append", index=False)
     conn.close()
 
 def assign_foreign_keys(df):
@@ -23,14 +22,15 @@ def assign_foreign_keys(df):
         email["sender"] = foreign_key
         foreign_key = get_unique_identifier(email["recipient"], RECIPIENT_TABLE)
         email["recipient"] = foreign_key
+    df = df.rename(columns={"sender": "sender_id", "recipient": "recipient_id"})
     return df
 
 def get_unique_identifier(ITEM, TABLE):
     """Returns the foreign key to the TABLE for the ITEM, if it is not 
     in the db, adds the ITEM and returns the newly created foreign key"""
     TABLE_NAME = TABLE["name"]
-    TABLE_ID = TABLE["columns"][0][0]
-    TABLE_ITEMS = TABLE["columns"][1][0]
+    TABLE_ID = TABLE["col_names"][0]
+    TABLE_ITEMS = TABLE["col_names"][1]
 
     conn = connect_db()
     cur = conn.cursor()
