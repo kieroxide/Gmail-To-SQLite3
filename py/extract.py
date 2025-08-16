@@ -30,10 +30,9 @@ def extract_data_from_email(service, ID):
     # Extracts all required data to dataframe
     result = service.users().messages().get(userId="me", id=ID).execute()
     payload = result["payload"]
-
     SNIPPET = ""
-    if "snippet" in payload:
-        SNIPPET = payload["snippet"]
+    if "snippet" in result:
+        SNIPPET = result["snippet"]
 
     BODY = get_body(payload)
     FROM, TO, SUBJECT, DATE = get_headers(payload)
@@ -67,7 +66,7 @@ def get_body(payload):
     
     else:
         #Some parts have no plaintext data
-        if not payload["body"]["data"]:
+        if not "data" in payload["body"]:
             return ""
         return clean_html_string(payload["body"]["data"])
 
