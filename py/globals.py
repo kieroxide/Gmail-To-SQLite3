@@ -1,5 +1,3 @@
-DB_PATH = "../sql/emails.db"
-
 DF_COLS = ["email_id", "sender", "recipient", "subject", "body", "snippet", "timestamp"]
 
 EMAIL_TABLE = {
