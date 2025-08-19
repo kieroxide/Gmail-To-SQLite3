@@ -9,10 +9,11 @@ def main():
     st.title("📧 Gmail → SQLite3 Importer")
     st.write("Import your Gmail messages into a local SQLite database.")
     init_tables()
-    service = authenticate_gmail()
-    ids = get_msg_ids(service)
+    if st.button("Connect Gmail"):
+        st.session_state.service = authenticate_gmail()
+        st.session_state.ids = get_msg_ids(st.session_state.service)
     if st.button("Start Import"):
-        extract_email_data_to_sql(ids, service)
+            extract_email_data_to_sql(st.session_state.ids, st.session_state.service)
 
 
 if __name__ == '__main__':
