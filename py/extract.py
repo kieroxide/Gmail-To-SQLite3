@@ -36,8 +36,7 @@ def extract_email_data_to_sql(service, ids):
             st.session_state.progress_ticker += 1
             st.session_state.progress_bar.progress(st.session_state.progress_ticker/TOTAL_EMAILS)
             st.session_state.status_text.text(
-                f"""Processing email {st.session_state.progress_ticker} 
-                of {TOTAL_EMAILS} ({round(st.session_state.progress_ticker*100/TOTAL_EMAILS,1)}%)""")
+                f"""Processing email {st.session_state.progress_ticker} of {TOTAL_EMAILS} ({round(st.session_state.progress_ticker*100/TOTAL_EMAILS,1)}%)""")
 
         # Appends data to sql_server
         df.set_index(EMAIL_TABLE["col_names"][0])

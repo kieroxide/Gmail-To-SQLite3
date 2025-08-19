@@ -6,6 +6,7 @@ from db import load_table, init_tables
 
 def main():
     init_settings()
+    import_current_db()
     authenticate_button()
     start_import()
 
@@ -23,6 +24,20 @@ def init_settings():
         status_placeholder.success("✅ Gmail Connected Successfully")
     else:
         status_placeholder.warning("⚠️ Not Connected")
+
+def import_current_db():
+    uploaded_file = st.file_uploader("📂 Import existing SQLite DB", type=["db", "sqlite"])
+    if uploaded_file is not None:
+        db_path = "../sql/" + st.session_state.db_name
+
+        # Save uploaded file to that location (overwrite or rename)
+        with open(db_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+
+        st.success("✅ Database imported successfully!")
+        return db_path
+    
+    return None
 
 def authenticate_button():
     # Only show the button if service is not yet connected
