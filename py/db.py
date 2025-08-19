@@ -1,10 +1,11 @@
 import sqlite3
 import pandas as pd
-from globals import DB_PATH, EMAIL_TABLE, SENDER_TABLE, RECIPIENT_TABLE
+import streamlit as st
+from globals import EMAIL_TABLE, SENDER_TABLE, RECIPIENT_TABLE
 
 def connect_db():
     """Ensures foreign_keys is always allowed by default"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect("../sql/" + st.session_state.db_name)
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
 
