@@ -3,21 +3,29 @@ from bs4 import BeautifulSoup
 from globals import EMAIL_TABLE, DF_COLS
 from utils import chunk_list
 from db import addToDB, connect_db
+from load import get_email_count
 import pandas as pd
 import time
+import streamlit as st
 
 API_TOTAL = 0
 
 def extract_email_data_to_sql(ids, service):
     """Iterates over email ids and saves the email's data to the sql database
     in chunks to alleviate wait times"""
-    global API_TOTAL
+    TOTAL_EMAILS = get_email_count(service)
+    CHUNK_SIZE = 100
+
     df = pd.DataFrame(columns=DF_COLS)
 
-    CHUNK_SIZE = 100 
-    conn = connect_db()
-    chunked_ids = chunk_list(list(ids), CHUNK_SIZE)
+    # UI variables
+    progress_ticker = 0
+    status_text = st.empty()
+    progress_bar = st.progress(0)
+    db_name = st.text_input("Database name", "emails.db")
 
+    chunked_ids = chunk_list(list(ids), CHUNK_SIZE)
+    conn = connect_db()
     # Get a chunk of email data and store in dataframe
     for id_chunk in chunked_ids:
         for id in id_chunk:
@@ -26,27 +34,36 @@ def extract_email_data_to_sql(ids, service):
             data_arr = extract_data_from_email(service, ID)
             if not data_arr:
                 continue
-            df.loc[len(df)] = data_arr
+            df.loc[len(df)] = data_arr 
 
-        print(f"{API_TOTAL} seconds")
-        API_TOTAL = 0
+            # Displays progress for the user
+            progress_ticker += 1
+            progress_bar.progress(progress_ticker/TOTAL_EMAILS)
+            status_text.text(f"Processing email {progress_ticker} of {TOTAL_EMAILS} ({round(progress_ticker*100/TOTAL_EMAILS,1)}%)")
+
         # Appends data to sql_server
         df.set_index(EMAIL_TABLE["col_names"][0])
         addToDB(df)
         df = df[0:0] # Empties data frame
 
     conn.close()
+    st.success(f"✅ Import finished! Database saved as `{db_name}`")
+
+    # Displays download button
+    with open("../sql/" + db_name, "rb") as f:
+        st.download_button(
+            label="📥 Download SQLite DB",
+            data=f,
+            file_name="emails.db",
+            mime="application/x-sqlite3"
+        )
 
 def extract_data_from_email(service, ID):
     """Requests the google API for the entire Email from the ID. Traverses the data structure
     and collects, cleans and returns the data into an array"""
     # Extracts all required data to dataframe
-    global API_TOTAL
     try:
-        API_CALL = time.perf_counter()
         result = service.users().messages().get(userId="me", id=ID).execute()
-        API_END = time.perf_counter()
-        API_TOTAL += API_END - API_CALL
     except Exception as e:
         print(f"Error {e}")
         return None

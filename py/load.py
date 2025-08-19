@@ -1,6 +1,10 @@
 from globals import EMAIL_TABLE
 from db import load_table
 
+def get_email_count(service):
+    profile = service.users().getProfile(userId="me").execute()
+    return profile["messagesTotal"]
+
 def get_msg_ids(service):
     """Builds and returns set of all email ids outside date range of db at a batch of max 500 each time
        page token allows to request the next batch"""
