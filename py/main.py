@@ -3,18 +3,52 @@ from auth import authenticate_gmail
 from load import get_msg_ids
 from extract import extract_email_data_to_sql
 from db import load_table, init_tables
-from globals import SENDER_TABLE, RECIPIENT_TABLE
 
 def main():
+    init_settings()
+    authenticate_button()
+    start_import()
+
+def init_settings():
+    if "db_name" not in st.session_state:
+        st.session_state.db_name = "emails.db"
+
     st.title("📧 Gmail → SQLite3 Importer")
     st.write("Import your Gmail messages into a local SQLite database.")
-    init_tables()
-    if st.button("Connect Gmail"):
-        st.session_state.service = authenticate_gmail()
-        st.session_state.ids = get_msg_ids(st.session_state.service)
-    if st.button("Start Import"):
-            extract_email_data_to_sql(st.session_state.ids, st.session_state.service)
+    # placeholder for connection status to keep its position
+    status_placeholder = st.empty()
 
+    # Dynamic updating of connection status
+    if "service" in st.session_state:
+        status_placeholder.success("✅ Gmail Connected Successfully")
+    else:
+        status_placeholder.warning("⚠️ Not Connected")
+
+def authenticate_button():
+    # Only show the button if service is not yet connected
+    if "service" not in st.session_state:
+        if st.button("Connect Gmail"):
+            st.session_state.service = authenticate_gmail()
+            st.session_state.ids = get_msg_ids(st.session_state.service)
+            st.rerun()
+
+def start_import():
+    init_tables()
+    if "service" in st.session_state:
+        st.session_state.db_name = st.text_input("Database name", "emails.db")
+        
+        if st.button("Start Import"):
+            extract_email_data_to_sql(st.session_state.service, st.session_state.ids)
+            st.success(f"✅ Import finished! Database saved as `{st.session_state.db_name}`")
+
+            # Displays download button
+            with open("../sql/" + st.session_state.db_name, "rb") as f:
+                st.download_button(
+                    label="📥 Download SQLite DB",
+                    data=f,
+                    file_name=st.session_state.db_name,
+                    mime="application/x-sqlite3"
+                )
 
 if __name__ == '__main__':
     main()
