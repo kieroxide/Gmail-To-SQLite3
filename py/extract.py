@@ -5,12 +5,9 @@ from utils import chunk_list
 from db import addToDB, connect_db
 from load import get_email_count
 import pandas as pd
-import time
 import streamlit as st
 
-API_TOTAL = 0
-
-def extract_email_data_to_sql(ids, service):
+def extract_email_data_to_sql(service, ids):
     """Iterates over email ids and saves the email's data to the sql database
     in chunks to alleviate wait times"""
     TOTAL_EMAILS = get_email_count(service)
@@ -19,10 +16,9 @@ def extract_email_data_to_sql(ids, service):
     df = pd.DataFrame(columns=DF_COLS)
 
     # UI variables
-    progress_ticker = 0
-    status_text = st.empty()
-    progress_bar = st.progress(0)
-    db_name = st.text_input("Database name", "emails.db")
+    st.session_state.progress_ticker = 0
+    st.session_state.status_text = st.empty()
+    st.session_state.progress_bar = st.progress(0)
 
     chunked_ids = chunk_list(list(ids), CHUNK_SIZE)
     conn = connect_db()
@@ -37,9 +33,11 @@ def extract_email_data_to_sql(ids, service):
             df.loc[len(df)] = data_arr 
 
             # Displays progress for the user
-            progress_ticker += 1
-            progress_bar.progress(progress_ticker/TOTAL_EMAILS)
-            status_text.text(f"Processing email {progress_ticker} of {TOTAL_EMAILS} ({round(progress_ticker*100/TOTAL_EMAILS,1)}%)")
+            st.session_state.progress_ticker += 1
+            st.session_state.progress_bar.progress(st.session_state.progress_ticker/TOTAL_EMAILS)
+            st.session_state.status_text.text(
+                f"""Processing email {st.session_state.progress_ticker} 
+                of {TOTAL_EMAILS} ({round(st.session_state.progress_ticker*100/TOTAL_EMAILS,1)}%)""")
 
         # Appends data to sql_server
         df.set_index(EMAIL_TABLE["col_names"][0])
@@ -47,16 +45,6 @@ def extract_email_data_to_sql(ids, service):
         df = df[0:0] # Empties data frame
 
     conn.close()
-    st.success(f"✅ Import finished! Database saved as `{db_name}`")
-
-    # Displays download button
-    with open("../sql/" + db_name, "rb") as f:
-        st.download_button(
-            label="📥 Download SQLite DB",
-            data=f,
-            file_name="emails.db",
-            mime="application/x-sqlite3"
-        )
 
 def extract_data_from_email(service, ID):
     """Requests the google API for the entire Email from the ID. Traverses the data structure
