@@ -2,49 +2,53 @@ import streamlit as st
 from auth import authenticate_gmail
 from load import get_msg_ids, get_email_count
 from extract import extract_email_data_to_sql
-from db import load_table, init_tables, current_email_count
+from db import init_tables, current_email_count
+import os
 
 def main():
     init_settings()
-    if st.session_state.unuploaded_flag and st.radio("Do you want to import an existing SQLite DB?", ("No", "Yes")) == "Yes":
-        import_current_db()
-    if not st.session_state.unuploaded_flag:
-        st.success("✅ Database imported successfully!")
+    handle_db_import()
     authenticate_button()
     start_import()
 
 def init_settings():
-    # Setting the default value for db_name to avoid invalid key error
     if "db_name" not in st.session_state:
         st.session_state.db_name = "emails.db"
-    if "unuploaded_flag" not in st.session_state:
-        st.session_state.unuploaded_flag = True
+    if "download_name" not in st.session_state:
+        st.session_state.download_name = st.session_state.db_name
+    if "service" not in st.session_state:
+        st.session_state.service = None
+
     st.title("📧 Gmail → SQLite3 Importer")
     st.write("Import your Gmail messages into a local SQLite database.")
-    # placeholder for connection status to keep its position
-    status_placeholder = st.empty()
-
-    # Dynamic updating of connection status
-    if "service" in st.session_state:
-        status_placeholder.success("✅ Gmail Connected Successfully")
+    if st.session_state.service:
+        st.success("✅ Gmail Connected Successfully")
     else:
-        status_placeholder.warning("⚠️ Not Connected")
+        st.warning("⚠️ Not Connected")
 
-def import_current_db():
-    uploaded_file = st.file_uploader("📂 Import existing SQLite DB", type=["db", "sqlite"])
-    if uploaded_file is not None:
-        st.session_state.db_name = uploaded_file.name
-        db_path = "../sql/" + st.session_state.db_name
-        # Save uploaded file to that location (overwrite or rename)
-        with open(db_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
+def handle_db_import():
+    st.subheader("Database Setup")
+    import_choice = st.checkbox("Import an existing SQLite DB?")
+    if import_choice:
+        uploaded_file = st.file_uploader("📂 Choose a DB file", type=["db", "sqlite"])
+        if uploaded_file:
+            # Ensure folder exists
+            os.makedirs("../sql", exist_ok=True)
+            
+            # Save file to disk
+            st.session_state.db_name = uploaded_file.name
+            db_path = "../sql/" + st.session_state.db_name
+            with open(db_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            st.success(f"✅ Database `{st.session_state.db_name}` imported successfully!")
 
-        st.session_state.unuploaded_flag = False
-        st.rerun()
+    # Let user rename for download
+    st.session_state.download_name = st.text_input(
+        "Database name for download", st.session_state.db_name
+    )
 
 def authenticate_button():
-    # Only show the button if service is not yet connected
-    if "service" not in st.session_state:
+    if not st.session_state.service:
         if st.button("Connect Gmail"):
             st.session_state.service = authenticate_gmail()
             st.session_state.ids = get_msg_ids(st.session_state.service)
@@ -55,15 +59,14 @@ def authenticate_button():
 
 def start_import():
     init_tables()
-    if "service" in st.session_state:
-        st.session_state.download_name = st.text_input("Database name", st.session_state.db_name)
-        
+    if st.session_state.service:
         if st.button("Start Import"):
+            db_path = "../sql/" + st.session_state.db_name
             extract_email_data_to_sql(st.session_state.service, st.session_state.ids)
-            st.success(f"✅ Import finished! Database saved as `{st.session_state.db_name}`")
+            st.success(f"✅ Import finished! Database saved as `{st.session_state.download_name}`")
 
-            # Displays download button
-            with open("../sql/" + st.session_state.db_name, "rb") as f:
+            # Download button
+            with open(db_path, "rb") as f:
                 st.download_button(
                     label="📥 Download SQLite DB",
                     data=f,
@@ -71,5 +74,5 @@ def start_import():
                     mime="application/x-sqlite3"
                 )
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
