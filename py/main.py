@@ -45,6 +45,9 @@ def authenticate_button():
         if st.button("Connect Gmail"):
             st.session_state.service = authenticate_gmail()
             st.session_state.ids = get_msg_ids(st.session_state.service)
+            if "emails_remaining" not in st.session_state:
+                st.session_state.emails_remaining = get_email_count(st.session_state.service)
+                st.session_state.emails_remaining -= current_email_count()
             st.rerun()
 
 def start_import():

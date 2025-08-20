@@ -90,3 +90,13 @@ def load_table(TABLE = EMAIL_TABLE):
     df = df.set_index(TABLE["col_names"][0])
     conn.close()
     return df
+
+def current_email_count():
+    """Returns the current amount of emails in the db"""
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT COUNT(*) FROM {EMAIL_TABLE["name"]};")
+    row_count = cursor.fetchone()[0]
+    return row_count
+

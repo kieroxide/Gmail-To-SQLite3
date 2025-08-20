@@ -10,7 +10,7 @@ import streamlit as st
 def extract_email_data_to_sql(service, ids):
     """Iterates over email ids and saves the email's data to the sql database
     in chunks to alleviate wait times"""
-    TOTAL_EMAILS = get_email_count(service)
+    TOTAL_EMAILS = st.session_state.emails_remaining
     CHUNK_SIZE = 100
 
     df = pd.DataFrame(columns=DF_COLS)
