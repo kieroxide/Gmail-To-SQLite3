@@ -35,11 +35,9 @@ def handle_db_import():
             with open(db_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
             st.success(f"✅ Database `{st.session_state.db_name}` imported successfully!")
-
-    # Let user rename for download
-    st.session_state.download_name = st.text_input(
-        "Database name for download", st.session_state.db_name
-    )
+            st.session_state.ids = get_msg_ids(st.session_state.service)
+            st.session_state.emails_remaining = get_email_count(st.session_state.service)
+            st.session_state.emails_remaining -= current_email_count()
 
 def authenticate_button():
     if not st.session_state.service:
@@ -58,6 +56,11 @@ def start_import():
             db_path = "../sql/" + st.session_state.db_name
             extract_email_data_to_sql(st.session_state.service, st.session_state.ids)
             st.success(f"✅ Import finished! Database saved as `{st.session_state.download_name}`")
+            
+            # Let user rename the download
+            st.session_state.download_name = st.text_input(
+            "Database name for download", st.session_state.db_name
+            )
 
             # Download button
             with open(db_path, "rb") as f:
